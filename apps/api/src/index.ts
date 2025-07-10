@@ -16,7 +16,7 @@ import type { ServerTypes } from "./vars";
 export const config = {
 	servers: [
 		{
-			url: "http://localhost:4002",
+			url: process.env.API_URL || "http://localhost:4002", // jimmy
 		},
 	],
 	openapi: "3.0.0",

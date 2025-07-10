@@ -487,10 +487,6 @@ function UserDropdownMenu({
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 						>
 							<Avatar className="h-8 w-8 rounded-lg border">
-								<AvatarImage
-									src="/vibrant-street-market.png"
-									alt={user?.name || "User"}
-								/>
 								<AvatarFallback className="rounded-lg">
 									{getUserInitials()}
 								</AvatarFallback>

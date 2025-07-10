@@ -99,7 +99,7 @@ export const auth: ReturnType<typeof betterAuth> = betterAuth({
 		enabled: true,
 	},
 	emailVerification: {
-		sendOnSignUp: true,
+		sendOnSignUp: !!smtpHost && !!smtpUser && !!smtpPass,
 		autoSignInAfterVerification: true,
 		sendVerificationEmail: async ({ user, token }) => {
 			const url = `${apiUrl}/auth/verify-email?token=${token}&callbackURL=${uiUrl}/dashboard?emailVerified=true`;

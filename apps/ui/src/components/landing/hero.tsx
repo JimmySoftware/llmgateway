@@ -377,7 +377,7 @@ export function Hero({ navbarOnly }: { navbarOnly?: boolean }) {
 										className="transition-transform hover:scale-105"
 									>
 										<img
-											src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=986038&theme=light&t=1751353042660"
+											src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=986038&theme=light"
 											alt="LLM&#0032;Gateway - One&#0032;API&#0032;Gateway&#0032;for&#0032;all&#0032;your&#0032;LLM&#0032;needs | Product Hunt"
 											style={{ width: "250px", height: "54px" }}
 											width="250"

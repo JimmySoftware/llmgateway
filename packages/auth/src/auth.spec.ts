@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { auth } from "./auth";
 
 describe("auth hooks", () => {
+	const apiUrl = process.env.API_URL || "http://localhost:4002";
+
 	beforeEach(async () => {
 		// Clean up any existing data
 		await Promise.all([
@@ -39,7 +41,7 @@ describe("auth hooks", () => {
 
 		// Sign up a new user
 		const signUpResponse = await auth.handler(
-			new Request("http://localhost:4002/auth/sign-up/email", {
+			new Request(`${apiUrl}/auth/sign-up/email`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
