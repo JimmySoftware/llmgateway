@@ -17,6 +17,7 @@ import {
 import { Label } from "@/lib/components/label";
 import { Switch } from "@/lib/components/switch";
 import { useToast } from "@/lib/components/use-toast";
+import { useAppConfigValue } from "@/lib/config";
 
 interface SubscriptionStatus {
 	plan: "free" | "pro";
@@ -29,6 +30,7 @@ export function PricingPlans() {
 	const navigate = useNavigate();
 	const { user } = useUser();
 	const { toast } = useToast();
+	const config = useAppConfigValue();
 	const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
 		"monthly",
 	);
@@ -45,7 +47,7 @@ export function PricingPlans() {
 
 	const fetchSubscriptionStatus = async () => {
 		try {
-			const response = await fetch("/api/subscriptions/status", {
+			const response = await fetch(`${config.apiUrl}/subscriptions/status`, {
 				credentials: "include",
 			});
 			if (response.ok) {
@@ -72,7 +74,7 @@ export function PricingPlans() {
 
 		try {
 			const response = await fetch(
-				"/api/subscriptions/create-pro-subscription",
+				`${config.apiUrl}/subscriptions/create-pro-subscription`,
 				{
 					method: "POST",
 					credentials: "include",
@@ -114,7 +116,7 @@ export function PricingPlans() {
 		setLoading("cancel");
 		try {
 			const response = await fetch(
-				"/api/subscriptions/cancel-pro-subscription",
+				`${config.apiUrl}/subscriptions/cancel-pro-subscription`,
 				{
 					method: "POST",
 					credentials: "include",
@@ -152,7 +154,7 @@ export function PricingPlans() {
 		setLoading("resume");
 		try {
 			const response = await fetch(
-				"/api/subscriptions/resume-pro-subscription",
+				`${config.apiUrl}/subscriptions/resume-pro-subscription`,
 				{
 					method: "POST",
 					credentials: "include",

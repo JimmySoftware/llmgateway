@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { allChangelogs, type Changelog } from "content-collections";
 
 import { ChangelogComponent } from "@/components/changelog";
-import { ProductHuntBanner } from "@/components/shared/product-hunt-banner";
+// import { ProductHuntBanner } from "@/components/shared/product-hunt-banner";
 
 export const Route = createFileRoute("/changelog/")({
 	loader: async () => {
@@ -45,7 +45,7 @@ function Changelog() {
 	const { entries } = Route.useLoaderData();
 	return (
 		<>
-			<ProductHuntBanner />
+			{/* <ProductHuntBanner /> */}
 			<ChangelogComponent entries={entries} />
 		</>
 	);

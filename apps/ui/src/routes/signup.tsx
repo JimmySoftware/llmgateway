@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { ProductHuntBanner } from "@/components/shared/product-hunt-banner";
+// import { ProductHuntBanner } from "@/components/shared/product-hunt-banner";
 import { useUser } from "@/hooks/useUser";
 import { useAuth } from "@/lib/auth-client";
 import { Button } from "@/lib/components/button";
@@ -107,7 +107,7 @@ function RouteComponent() {
 
 	return (
 		<>
-			<ProductHuntBanner />
+			{/* <ProductHuntBanner /> */}
 			<div className="px-4 sm:px-0 max-w-[64rm] mx-auto flex h-screen w-screen flex-col items-center justify-center">
 				<div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
 					<div className="flex flex-col space-y-2 text-center">
