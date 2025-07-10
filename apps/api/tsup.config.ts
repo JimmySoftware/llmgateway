@@ -11,8 +11,8 @@ export default defineConfig({
 	entry: ["src/**/!(*.spec).ts", "src/**/!(*.e2e).ts"],
 	sourcemap: true,
 	target: "esnext",
-	external: ["@llmgateway/db", "@llmgateway/models", "@llmgateway/auth"],
-	noExternal: [/^(?!@llmgateway\/).*/],
+	external: [],
+	noExternal: [/.*/],
 	esbuildPlugins: [fixExtensionsPlugin()],
 	banner: {
 		js: `import { createRequire } from 'module'; const require = createRequire(import.meta.url);`,

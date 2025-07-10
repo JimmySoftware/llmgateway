@@ -356,7 +356,7 @@ export function Hero({ navbarOnly }: { navbarOnly?: boolean }) {
 								</div>
 
 								{/* Product Hunt Badge - Keep in fixed position */}
-								<AnimatedGroup
+								{/* <AnimatedGroup
 									variants={{
 										container: {
 											visible: {
@@ -384,7 +384,7 @@ export function Hero({ navbarOnly }: { navbarOnly?: boolean }) {
 											height="54"
 										/>
 									</a>
-								</AnimatedGroup>
+								</AnimatedGroup> */}
 							</div>
 
 							<AnimatedGroup

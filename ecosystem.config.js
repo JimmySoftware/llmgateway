@@ -1,0 +1,88 @@
+const dotenv = require("dotenv");
+const path = require("path");
+
+// Load environment variables from .env file
+const envConfig = dotenv.config({ path: path.resolve(__dirname, ".env") });
+
+module.exports = {
+	apps: [
+		{
+			name: "llmgateway-gateway",
+			script: "./dist/serve.js",
+			cwd: "./apps/gateway",
+			env: {
+				NODE_ENV: "production",
+				PORT: 4001,
+				...envConfig.parsed,
+			},
+			error_file: "/sites/agenticgateway.ai/logs/pm2/gateway-error.log",
+			out_file: "/sites/agenticgateway.ai/logs/pm2/gateway-out.log",
+			log_file: "/sites/agenticgateway.ai/logs/pm2/gateway-combined.log",
+			time: true,
+			instances: 1,
+			exec_mode: "cluster",
+			autorestart: true,
+			watch: false,
+			max_memory_restart: "1G",
+		},
+		{
+			name: "llmgateway-api",
+			script: "./dist/serve.js",
+			cwd: "./apps/api",
+			env: {
+				NODE_ENV: "production",
+				PORT: 4002,
+				...envConfig.parsed,
+			},
+			error_file: "/sites/agenticgateway.ai/logs/pm2/api-error.log",
+			out_file: "/sites/agenticgateway.ai/logs/pm2/api-out.log",
+			log_file: "/sites/agenticgateway.ai/logs/pm2/api-combined.log",
+			time: true,
+			instances: 1,
+			exec_mode: "cluster",
+			autorestart: true,
+			watch: false,
+			max_memory_restart: "1G",
+		},
+		{
+			name: "llmgateway-ui",
+			script: "pnpm",
+			args: "start",
+			cwd: "./apps/ui",
+			env: {
+				NODE_ENV: "production",
+				PORT: 3002,
+				...envConfig.parsed,
+			},
+			error_file: "/sites/agenticgateway.ai/logs/pm2/ui-error.log",
+			out_file: "/sites/agenticgateway.ai/logs/pm2/ui-out.log",
+			log_file: "/sites/agenticgateway.ai/logs/pm2/ui-combined.log",
+			time: true,
+			instances: 1,
+			exec_mode: "cluster",
+			autorestart: true,
+			watch: false,
+			max_memory_restart: "1G",
+		},
+		{
+			name: "llmgateway-docs",
+			script: "pnpm",
+			args: "start",
+			cwd: "./apps/docs",
+			env: {
+				NODE_ENV: "production",
+				PORT: 3005,
+				...envConfig.parsed,
+			},
+			error_file: "/sites/agenticgateway.ai/logs/pm2/docs-error.log",
+			out_file: "/sites/agenticgateway.ai/logs/pm2/docs-out.log",
+			log_file: "/sites/agenticgateway.ai/logs/pm2/docs-combined.log",
+			time: true,
+			instances: 1,
+			exec_mode: "cluster",
+			autorestart: true,
+			watch: false,
+			max_memory_restart: "1G",
+		},
+	],
+};

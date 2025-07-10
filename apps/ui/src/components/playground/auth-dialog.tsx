@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, KeySquare } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -155,30 +155,31 @@ export function AuthDialog({ open }: AuthDialogProps) {
 		setIsLoading(false);
 	};
 
-	const handlePasskeySignIn = async () => {
-		setIsLoading(true);
-		try {
-			const res = await signIn.passkey();
-			if (res?.error) {
-				toast({
-					title: res.error.message || "Failed to sign in with passkey",
-					variant: "destructive",
-				});
-				return;
-			}
-			const queryKey = api.queryOptions("get", "/user/me").queryKey;
-			queryClient.invalidateQueries({ queryKey });
-			posthog.capture("user_logged_in", { method: "passkey" });
-			toast({ title: "Login successful" });
-		} catch (error: any) {
-			toast({
-				title: error?.message || "Failed to sign in with passkey",
-				variant: "destructive",
-			});
-		} finally {
-			setIsLoading(false);
-		}
-	};
+	// Passkey sign-in disabled
+	// const handlePasskeySignIn = async () => {
+	// 	setIsLoading(true);
+	// 	try {
+	// 		const res = await signIn.passkey();
+	// 		if (res?.error) {
+	// 			toast({
+	// 				title: res.error.message || "Failed to sign in with passkey",
+	// 				variant: "destructive",
+	// 			});
+	// 			return;
+	// 		}
+	// 		const queryKey = api.queryOptions("get", "/user/me").queryKey;
+	// 		queryClient.invalidateQueries({ queryKey });
+	// 		posthog.capture("user_logged_in", { method: "passkey" });
+	// 		toast({ title: "Login successful" });
+	// 	} catch (error: any) {
+	// 		toast({
+	// 			title: error?.message || "Failed to sign in with passkey",
+	// 			variant: "destructive",
+	// 		});
+	// 	} finally {
+	// 		setIsLoading(false);
+	// 	}
+	// };
 
 	return (
 		<Dialog open={open} modal={true}>
@@ -216,7 +217,7 @@ export function AuthDialog({ open }: AuthDialogProps) {
 											<Input
 												placeholder="name@example.com"
 												type="email"
-												autoComplete="username webauthn"
+												autoComplete="username"
 												{...field}
 											/>
 										</FormControl>
@@ -234,7 +235,7 @@ export function AuthDialog({ open }: AuthDialogProps) {
 											<Input
 												placeholder="••••••••"
 												type="password"
-												autoComplete="current-password webauthn"
+												autoComplete="current-password"
 												{...field}
 											/>
 										</FormControl>
@@ -321,7 +322,8 @@ export function AuthDialog({ open }: AuthDialogProps) {
 					</Form>
 				)}
 
-				{mode === "login" && (
+				{/* Passkey sign-in disabled */}
+				{/* {mode === "login" && (
 					<>
 						<div className="relative">
 							<div className="absolute inset-0 flex items-center">
@@ -347,7 +349,7 @@ export function AuthDialog({ open }: AuthDialogProps) {
 							Sign in with passkey
 						</Button>
 					</>
-				)}
+				)} */}
 
 				<div className="text-center text-sm">
 					{mode === "login" ? (

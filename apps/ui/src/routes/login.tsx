@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { Loader2, KeySquare } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -59,11 +59,12 @@ function RouteComponent() {
 		},
 	});
 
-	useEffect(() => {
-		if (window.PublicKeyCredential) {
-			void signIn.passkey({ autoFill: true });
-		}
-	}, [signIn]);
+	// Passkey autofill disabled
+	// useEffect(() => {
+	// 	if (window.PublicKeyCredential) {
+	// 		void signIn.passkey({ autoFill: true });
+	// 	}
+	// }, [signIn]);
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		setIsLoading(true);
@@ -105,29 +106,30 @@ function RouteComponent() {
 		setIsLoading(false);
 	}
 
-	async function handlePasskeySignIn() {
-		setIsLoading(true);
-		try {
-			const res = await signIn.passkey();
-			if (res?.error) {
-				toast({
-					title: res.error.message || "Failed to sign in with passkey",
-					variant: "destructive",
-				});
-				return;
-			}
-			posthog.capture("user_logged_in", { method: "passkey" });
-			toast({ title: "Login successful" });
-			navigate({ to: "/dashboard" });
-		} catch (error: any) {
-			toast({
-				title: error?.message || "Failed to sign in with passkey",
-				variant: "destructive",
-			});
-		} finally {
-			setIsLoading(false);
-		}
-	}
+	// Passkey sign-in disabled
+	// async function handlePasskeySignIn() {
+	// 	setIsLoading(true);
+	// 	try {
+	// 		const res = await signIn.passkey();
+	// 		if (res?.error) {
+	// 			toast({
+	// 				title: res.error.message || "Failed to sign in with passkey",
+	// 				variant: "destructive",
+	// 			});
+	// 			return;
+	// 		}
+	// 		posthog.capture("user_logged_in", { method: "passkey" });
+	// 		toast({ title: "Login successful" });
+	// 		navigate({ to: "/dashboard" });
+	// 	} catch (error: any) {
+	// 		toast({
+	// 			title: error?.message || "Failed to sign in with passkey",
+	// 			variant: "destructive",
+	// 		});
+	// 	} finally {
+	// 		setIsLoading(false);
+	// 	}
+	// }
 
 	return (
 		<>
@@ -154,7 +156,7 @@ function RouteComponent() {
 											<Input
 												placeholder="name@example.com"
 												type="email"
-												autoComplete="username webauthn"
+												autoComplete="username"
 												{...field}
 											/>
 										</FormControl>
@@ -172,7 +174,7 @@ function RouteComponent() {
 											<Input
 												placeholder="••••••••"
 												type="password"
-												autoComplete="current-password webauthn"
+												autoComplete="current-password"
 												{...field}
 											/>
 										</FormControl>
@@ -192,29 +194,6 @@ function RouteComponent() {
 							</Button>
 						</form>
 					</Form>
-					<div className="relative">
-						<div className="absolute inset-0 flex items-center">
-							<span className="w-full border-t" />
-						</div>
-						<div className="relative flex justify-center text-xs uppercase">
-							<span className="bg-background px-2 text-muted-foreground">
-								Or
-							</span>
-						</div>
-					</div>
-					<Button
-						onClick={handlePasskeySignIn}
-						variant="outline"
-						className="w-full"
-						disabled={isLoading}
-					>
-						{isLoading ? (
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-						) : (
-							<KeySquare className="mr-2 h-4 w-4" />
-						)}
-						Sign in with passkey
-					</Button>
 					<p className="px-8 text-center text-sm text-muted-foreground">
 						<Link
 							to="/signup"
