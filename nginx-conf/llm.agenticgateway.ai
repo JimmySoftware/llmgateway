@@ -1,0 +1,54 @@
+include sites-available/llm.agenticgateway.ai/before/*; # Managed by SpinupWP
+
+# WebSocket connection upgrade map
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+	listen 443 ssl; # Managed by SpinupWP
+	listen [::]:443 ssl; # Managed by SpinupWP
+	http2 on; # Managed by SpinupWP
+
+	server_name llm.agenticgateway.ai; # Managed by SpinupWP
+
+	ssl_certificate /etc/letsencrypt/live/llm.agenticgateway.ai/fullchain.pem; # Managed by SpinupWP
+	ssl_certificate_key /etc/letsencrypt/live/llm.agenticgateway.ai/privkey.pem; # Managed by SpinupWP
+
+	access_log /sites/llm.agenticgateway.ai/logs/access.log;
+	error_log /sites/llm.agenticgateway.ai/logs/error.log;
+
+	# Security headers
+	add_header X-Frame-Options "SAMEORIGIN";
+	add_header X-Content-Type-Options "nosniff";
+	add_header X-Xss-Protection "1; mode=block";
+	add_header Referrer-Policy "strict-origin-when-cross-origin";
+
+	# Proxy all requests to the dev server
+	location / {
+		proxy_pass http://localhost:3002;
+		proxy_http_version 1.1;
+		
+		# WebSocket support
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection $connection_upgrade;
+		
+		# Host header
+		proxy_set_header Host localhost;
+		proxy_cache_bypass $http_upgrade;
+		
+		# Forward real client info
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header X-Forwarded-Host $server_name;
+		
+		# Timeouts for long-lived connections
+		proxy_connect_timeout 7d;
+		proxy_send_timeout 7d;
+		proxy_read_timeout 7d;
+	}
+}
+
+include sites-available/llm.agenticgateway.ai/after/*; # Managed by SpinupWP

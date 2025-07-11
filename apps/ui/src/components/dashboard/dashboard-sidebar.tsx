@@ -29,7 +29,7 @@ import { OrganizationSwitcher } from "./organization-switcher";
 import { TopUpCreditsDialog } from "@/components/credits/top-up-credits-dialog";
 import { useUser } from "@/hooks/useUser";
 import { useAuth } from "@/lib/auth-client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/lib/components/avatar";
+import { Avatar, AvatarFallback } from "@/lib/components/avatar";
 import { Button } from "@/lib/components/button";
 import {
 	DropdownMenu,
@@ -509,10 +509,10 @@ function UserDropdownMenu({
 						<DropdownMenuLabel className="p-0 font-normal">
 							<div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 								<Avatar className="h-8 w-8 rounded-lg border">
-									<AvatarImage
+									{/* <AvatarImage
 										src="/vibrant-street-market.png"
 										alt={user?.name || "User"}
-									/>
+									/> */}
 									<AvatarFallback className="rounded-lg">
 										{getUserInitials()}
 									</AvatarFallback>

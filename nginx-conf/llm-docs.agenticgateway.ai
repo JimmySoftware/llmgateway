@@ -1,0 +1,54 @@
+include sites-available/llm-docs.agenticgateway.ai/before/*; # Managed by SpinupWP
+
+server {
+	listen 443 ssl; # Managed by SpinupWP
+	listen [::]:443 ssl; # Managed by SpinupWP
+	http2 on; # Managed by SpinupWP
+
+	server_name llm-docs.agenticgateway.ai; # Managed by SpinupWP
+
+	ssl_certificate /etc/letsencrypt/live/llm-docs.agenticgateway.ai/fullchain.pem; # Managed by SpinupWP
+	ssl_certificate_key /etc/letsencrypt/live/llm-docs.agenticgateway.ai/privkey.pem; # Managed by SpinupWP
+
+	root /sites/llm-docs.agenticgateway.ai/files/;
+
+	index index.html index.php;
+
+	access_log /sites/llm-docs.agenticgateway.ai/logs/access.log;
+	error_log /sites/llm-docs.agenticgateway.ai/logs/error.log;
+
+	# Don't allow pages to be rendered in an iframe on external domains.
+	add_header X-Frame-Options "SAMEORIGIN";
+
+	# MIME sniffing prevention
+	add_header X-Content-Type-Options "nosniff";
+
+	# Enable cross-site scripting filter in supported browsers.
+	add_header X-Xss-Protection "1; mode=block";
+
+	# Limit referrer information sent with requests to third parties.
+	add_header Referrer-Policy "strict-origin-when-cross-origin";
+
+	include sites-available/llm-docs.agenticgateway.ai/server/*; # Managed by SpinupWP
+
+	# Prevent access to hidden files
+	location ~* /\.(?!well-known\/) {
+		deny all;
+	}
+
+	# Prevent access to certain file extensions
+	location ~ \.(ini|log|conf|blade.php)$ {
+		deny all;
+	}
+
+        location / {
+                proxy_pass http://localhost:3005;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+        }
+}
+
+include sites-available/llm-docs.agenticgateway.ai/after/*; # Managed by SpinupWP
