@@ -1,0 +1,17 @@
+{
+	"name": "@llmgateway/scripts",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"user": "tsx user-management.ts"
+	},
+	"dependencies": {
+		"@inquirer/prompts": "^7.6.0",
+		"@llmgateway/auth": "workspace:*",
+		"@llmgateway/db": "workspace:*",
+		"chalk": "^5.4.1",
+		"cli-table3": "^0.6.5",
+		"commander": "^13.1.0",
+		"tsx": "^4.20.3"
+	}
+}
