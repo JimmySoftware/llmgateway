@@ -5,7 +5,8 @@ import { relations } from "./relations";
 
 const client = new Client({
 	connectionString:
-		process.env.DATABASE_URL || "postgres://postgres:pw@localhost:5432/db",
+		process.env.DATABASE_URL ||
+		"postgres://postgres:pw@localhost:5432/llmgateway",
 });
 
 void client.connect();

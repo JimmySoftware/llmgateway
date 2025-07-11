@@ -1,9 +1,14 @@
 #!/usr/bin/env tsx
+
 import { confirm, input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import Table from "cli-table3";
 import { program } from "commander";
+import { config } from "dotenv";
+import fs from "fs";
+import path from "path";
 
+// Import database modules - the connection will use the DATABASE_URL we just loaded
 import { closeDatabase } from "../packages/db/src/db.js";
 import { desc, eq, ilike, or } from "../packages/db/src/index.js";
 import { db } from "../packages/db/src/index.js";
@@ -14,6 +19,37 @@ import {
 	user,
 	userOrganization,
 } from "../packages/db/src/index.js";
+
+// Load .env file from parent directory to ensure correct DATABASE_URL is used
+const envPath = path.resolve(__dirname, "../.env");
+if (!fs.existsSync(envPath)) {
+	console.error("Error: .env file not found at", envPath);
+	console.error("Please ensure .env file exists in the project root");
+	process.exit(1);
+}
+
+const envResult = config({ path: envPath });
+if (envResult.error) {
+	console.error("Error loading .env file:", envResult.error.message);
+	process.exit(1);
+}
+
+// Verify DATABASE_URL is set
+if (!process.env.DATABASE_URL) {
+	console.error("Error: DATABASE_URL not found in .env file");
+	console.error("Please add DATABASE_URL to your .env file");
+	process.exit(1);
+}
+
+// Show database info in debug mode (after chalk is imported)
+if (process.env.DEBUG || process.argv.includes("--debug")) {
+	const dbUrl = new URL(process.env.DATABASE_URL);
+	console.log(
+		chalk.gray(
+			`Debug: Connected to database '${dbUrl.pathname.slice(1)}' at ${dbUrl.hostname}`,
+		),
+	);
+}
 
 const formatDate = (date: Date | null) => {
 	if (!date) {
@@ -367,6 +403,26 @@ program
 			}
 
 			await db.update(user).set(updates).where(eq(user.id, userToUpdate.id));
+
+			// If email verification status changed, invalidate all user sessions
+			// This forces the user to log in again with fresh data
+			if (updates.emailVerified !== undefined) {
+				const deleteSessionsConfirm = await confirm({
+					message:
+						"Clear all user sessions to force re-login with updated data?",
+					default: true,
+				});
+
+				if (deleteSessionsConfirm) {
+					await db.delete(session).where(eq(session.userId, userToUpdate.id));
+					console.log(chalk.yellow("\n✓ All user sessions cleared"));
+					console.log(
+						chalk.yellow(
+							"The user will need to log in again to see the changes",
+						),
+					);
+				}
+			}
 
 			console.log(chalk.green("\n✓ User flags updated successfully"));
 			if (updates.emailVerified !== undefined) {
