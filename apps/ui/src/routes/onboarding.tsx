@@ -14,10 +14,24 @@ function OnboardingPage() {
 	const session = useSession();
 
 	useEffect(() => {
-		if (!session.isPending && !session.data?.user) {
-			navigate({ to: "/login" });
+		// Only redirect if we're sure there's no session
+		// Don't redirect while session is loading to prevent race conditions
+		if (!session.isPending && session.data === null) {
+			navigate({ to: "/login", replace: true });
 		}
 	}, [session.data, session.isPending, navigate]);
+
+	// Show loading state while session is being fetched
+	if (session.isPending) {
+		return (
+			<div className="bg-background min-h-screen flex items-center justify-center">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+					<p className="mt-4 text-muted-foreground">Loading...</p>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="bg-background min-h-screen">

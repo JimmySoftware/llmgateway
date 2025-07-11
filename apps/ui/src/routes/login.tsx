@@ -40,12 +40,20 @@ function RouteComponent() {
 	const posthog = usePostHog();
 	const [isLoading, setIsLoading] = useState(false);
 	const { signIn } = useAuth();
-	useUser({
-		redirectTo: "/dashboard",
-		redirectWhen: "authenticated",
-		checkEmailVerification: true,
-		checkOnboarding: true,
-	});
+	// Don't use automatic redirect here - handle it manually after login
+	// to prevent race conditions with the onSuccess handler
+	const { user } = useUser();
+
+	// If already logged in, redirect based on onboarding status
+	useEffect(() => {
+		if (user) {
+			if (user.onboardingCompleted) {
+				navigate({ to: "/dashboard", replace: true });
+			} else {
+				navigate({ to: "/onboarding", replace: true });
+			}
+		}
+	}, [user, navigate]);
 
 	useEffect(() => {
 		posthog.capture("page_viewed_login");
@@ -75,7 +83,9 @@ function RouteComponent() {
 			},
 			{
 				onSuccess: (ctx) => {
-					QueryClient.clear();
+					// Don't clear all queries - this causes session data to be lost
+					// Instead, invalidate specific queries if needed
+					QueryClient.invalidateQueries({ queryKey: ["user"] });
 					posthog.identify(ctx.data.user.id, {
 						email: ctx.data.user.email,
 						name: ctx.data.user.name,
@@ -85,7 +95,12 @@ function RouteComponent() {
 						email: values.email,
 					});
 					toast({ title: "Login successful" });
-					navigate({ to: "/dashboard", replace: true });
+					// Navigate based on onboarding status
+					if (ctx.data.user.onboardingCompleted) {
+						navigate({ to: "/dashboard", replace: true });
+					} else {
+						navigate({ to: "/onboarding", replace: true });
+					}
 				},
 				onError: (ctx) => {
 					toast({

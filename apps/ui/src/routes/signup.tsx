@@ -70,7 +70,8 @@ function RouteComponent() {
 			},
 			{
 				onSuccess: (ctx) => {
-					QueryClient.clear();
+					// Don't clear all queries
+					QueryClient.invalidateQueries({ queryKey: ["user"] });
 					posthog.identify(ctx.data.user.id, {
 						email: ctx.data.user.email,
 						name: ctx.data.user.name,
@@ -84,7 +85,7 @@ function RouteComponent() {
 						description:
 							"Please check your email to verify your account before signing in.",
 					});
-					navigate({ to: "/onboarding" });
+					navigate({ to: "/onboarding", replace: true });
 				},
 				onError: (ctx) => {
 					toast({
