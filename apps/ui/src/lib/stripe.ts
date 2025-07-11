@@ -9,8 +9,8 @@ function getStripePromise() {
 	if (!stripePromise) {
 		stripePromise = loadStripe(
 			process.env.NODE_ENV === "development"
-				? "pk_test_51RRXM1CYKGHizcWTfXxFSEzN8gsUQkg2efi2FN5KO2M2hxdV9QPCjeZMPaZQHSAatxpK9wDcSeilyYU14gz2qA2p00R4q5xU1R"
-				: "pk_live_51RRXLsEAkKxa3kRayCPr9oW8dUp7mIzwev1FVpM3jpKU3StLaaiKvXCEPkewabL5hRip4IXLzFlFTLC4RpFWRknN00lX2vgZHP",
+				? "pk_test_51OR46OG0AAe1zaJuugBLEaGl1Zv0JmF6nSrYWTujKcQn7a5Xy0QTgADUrIvCSz8aKPl7edclnj88vqYhQrWTDaj100fwe7s0fb"
+				: "pk_test_51OR46OG0AAe1zaJuugBLEaGl1Zv0JmF6nSrYWTujKcQn7a5Xy0QTgADUrIvCSz8aKPl7edclnj88vqYhQrWTDaj100fwe7s0fb",
 		);
 	}
 	return stripePromise;
