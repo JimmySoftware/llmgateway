@@ -161,10 +161,17 @@ function RouteComponent() {
 			return;
 		}
 		setIsLoading(true);
-		addLocalMessage({ role: "user", content });
 
 		try {
 			const chatId = await ensureCurrentChat(content);
+
+			// Add a delay to ensure welcome message is cleared first
+			await new Promise((resolve) => {
+				setTimeout(resolve, 200);
+			});
+
+			// Add user message only after chat is successfully created and welcome is cleared
+			addLocalMessage({ role: "user", content });
 
 			await addMessage.mutateAsync({
 				params: {

@@ -251,7 +251,11 @@ export function ChatUi({
 										message.role === "user" ? "text-right" : ""
 									}`}
 								>
-									<div className="flex items-center gap-2">
+									<div
+										className={`mt-1.5 flex items-center gap-2 ${
+											message.role === "user" ? "justify-end" : ""
+										}`}
+									>
 										<div
 											className={`text-sm font-medium ${
 												message.role === "user" ? "order-2" : ""
