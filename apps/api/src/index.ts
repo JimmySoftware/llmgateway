@@ -28,10 +28,17 @@ export const config = {
 
 export const app = new OpenAPIHono<ServerTypes>();
 
+// Parse ORIGIN_URL to support multiple origins separated by commas
+const allowedOrigins = process.env.ORIGIN_URL
+	? process.env.ORIGIN_URL.split(",")
+			.map((url) => url.trim())
+			.filter((url) => url && !url.startsWith("#"))
+	: [process.env.UI_URL || "http://localhost:3002"];
+
 app.use(
 	"*",
 	cors({
-		origin: process.env.UI_URL || "http://localhost:3002",
+		origin: allowedOrigins,
 		allowHeaders: ["Content-Type", "Authorization", "Cache-Control"],
 		allowMethods: ["POST", "GET", "OPTIONS", "PUT", "PATCH", "DELETE"],
 		exposeHeaders: ["Content-Length"],
