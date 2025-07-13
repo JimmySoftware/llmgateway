@@ -9,10 +9,13 @@ import { authHandler } from "./auth/handler";
 import { routes } from "./routes";
 import "./routes/activity";
 import "./routes/api-keys";
+import "./routes/chat";
+import "./routes/chats";
 import "./routes/credits";
 import "./routes/organizations";
 import "./routes/payments";
 import "./routes/projects";
+import "./routes/subscriptions";
 import "./routes/user";
 
 import type { ServerTypes } from "./vars";

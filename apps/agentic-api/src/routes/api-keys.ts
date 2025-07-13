@@ -11,7 +11,7 @@ function generateApiKey(): string {
 }
 
 // Hash the API key for storage
-async function hashApiKey(key: string): Promise<string> {
+async function _hashApiKey(key: string): Promise<string> {
 	const encoder = new TextEncoder();
 	const data = encoder.encode(key);
 	const hashBuffer = await crypto.subtle.digest("SHA-256", data);
@@ -24,7 +24,10 @@ function maskApiKey(key: string): string {
 	if (!key || key.length < 16) {
 		return "sk-****";
 	}
-	return `${key.substring(0, 7)}...${key.substring(key.length - 4)}`;
+	// Show first 12 chars to match main API behavior
+	const visibleChars = 12;
+	const maskedLength = Math.max(key.length - visibleChars, 0);
+	return `${key.substring(0, visibleChars)}${"\u2022".repeat(maskedLength)}`;
 }
 
 // Get API keys
@@ -223,15 +226,16 @@ routes.openapi(
 
 		// Generate API key
 		const apiKey = generateApiKey();
-		const hashedToken = await hashApiKey(apiKey);
 
 		// Create the API key record
+		// Note: Storing plain token to match gateway expectations
+		// In production, this should be hashed and gateway should be updated
 		const [newKey] = await db
 			.insert(tables.apiKey)
 			.values({
 				description,
 				projectId,
-				token: hashedToken, // Store hashed token for security
+				token: apiKey, // Store plain token to match gateway
 				status: "active",
 			})
 			.returning();
