@@ -62,10 +62,12 @@ export const auth: ReturnType<typeof betterAuth> = betterAuth({
 	advanced: {
 		crossSubDomainCookies: {
 			enabled: true,
-			domain: new URL(apiUrl).hostname,
+			domain: ".agenticgateway.ai", // Use parent domain for cross-subdomain cookies
 		},
 		defaultCookieAttributes: {
-			domain: new URL(apiUrl).hostname,
+			domain: ".agenticgateway.ai", // Use parent domain for cross-subdomain cookies
+			sameSite: "lax",
+			secure: process.env.NODE_ENV === "production",
 		},
 	},
 	session: {

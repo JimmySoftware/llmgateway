@@ -3,7 +3,6 @@ import {
 	Outlet,
 	createFileRoute,
 	useRouterState,
-	useNavigate,
 	useSearch,
 } from "@tanstack/react-router";
 import { usePostHog } from "posthog-js/react";
@@ -28,7 +27,6 @@ export const Route = createFileRoute("/dashboard/_layout")({
 function RouteComponent() {
 	const posthog = usePostHog();
 	const { location } = useRouterState();
-	const navigate = useNavigate();
 	const search = useSearch({ from: "/dashboard/_layout" }) as {
 		emailVerified?: boolean;
 	};
@@ -85,7 +83,11 @@ function RouteComponent() {
 
 	// Auto-select first organization if none selected
 	useEffect(() => {
-		if (organizations.length > 0 && !selectedOrganizationId) {
+		if (
+			organizations.length > 0 &&
+			!selectedOrganizationId &&
+			organizations[0]
+		) {
 			setSelectedOrganizationId(organizations[0].id);
 		}
 	}, [organizations, selectedOrganizationId]);
@@ -123,13 +125,10 @@ function RouteComponent() {
 				description: "Your email address has been verified.",
 			});
 
-			// Clean up the URL parameter using TanStack Router
-			navigate({
-				to: location.pathname,
-				replace: true,
-			});
+			// Force a page reload to ensure user data is refreshed
+			window.location.href = location.pathname;
 		}
-	}, [search.emailVerified, location.pathname, navigate]);
+	}, [search.emailVerified, location.pathname]);
 
 	// Refetch organizations query when navigating between dashboard pages
 	useEffect(() => {

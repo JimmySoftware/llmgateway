@@ -14,3 +14,5 @@ hydrateRoot(
 		<StartClient router={router} />
 	</StrictMode>,
 );
+
+export default {};

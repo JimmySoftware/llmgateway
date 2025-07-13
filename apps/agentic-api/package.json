@@ -1,0 +1,35 @@
+{
+	"name": "agentic-api",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"files": [
+		"dist/"
+	],
+	"scripts": {
+		"build": "tsc && tsup && pnpm run generate",
+		"dev": "nodemon -e ts,json --exec 'tsx src/serve.ts'",
+		"generate": "tsx ./src/scripts/generate-openapi.ts",
+		"start": "node dist/serve.js"
+	},
+	"dependencies": {
+		"@hono/node-server": "^1.14.1",
+		"@hono/swagger-ui": "^0.5.1",
+		"@hono/zod-openapi": "^0.19.6",
+		"@hono/zod-validator": "^0.7.0",
+		"@llmgateway/auth": "workspace:*",
+		"@llmgateway/db": "workspace:*",
+		"@types/nodemailer": "^6.4.17",
+		"better-auth": "1.2.7",
+		"drizzle-zod": "0.7.1",
+		"hono": "^4.7.6",
+		"hono-openapi": "^0.4.6",
+		"nanoid": "5.1.5",
+		"nodemailer": "^6.10.1",
+		"zod": "3.25.75",
+		"zod-openapi": "^4.2.4"
+	},
+	"devDependencies": {
+		"@types/node": "^24.0.3"
+	}
+}

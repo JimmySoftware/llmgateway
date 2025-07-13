@@ -22,8 +22,8 @@ pkill -f "next start" 2>/dev/null || true
 pkill -f "next dev" 2>/dev/null || true
 
 # Stop any remaining node processes on our ports
-echo "Stopping any remaining processes on ports 4001, 4002, 3000, 3002, 3005..."
-for port in 4001 4002 3000 3002 3005; do
+echo "Stopping any remaining processes on ports 4000, 4001, 4002, 3000, 3002, 3005..."
+for port in 4000 4001 4002 3000 3002 3005; do
     pid=$(lsof -ti :$port 2>/dev/null)
     if [ ! -z "$pid" ]; then
         echo "Killing process on port $port (PID: $pid)"
@@ -39,7 +39,7 @@ echo ""
 echo "Checking for remaining processes..."
 remaining=0
 
-for port in 4001 4002 3000 3002 3005; do
+for port in 4000 4001 4002 3000 3002 3005; do
     if lsof -ti :$port >/dev/null 2>&1; then
         echo "⚠️  Port $port is still in use"
         remaining=1

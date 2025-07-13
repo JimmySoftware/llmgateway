@@ -21,7 +21,7 @@ async function startServer() {
 	// This runs in the background and won't block startup
 	void sendInstallationBeacon();
 
-	console.log("listening on port", port);
+	console.log(`listening on port \x1b[33m${port}\x1b[0m`);
 
 	serve({
 		port,

@@ -12,10 +12,10 @@ export function useFetchClient() {
 
 	return useMemo(() => {
 		return createFetchClient<paths>({
-			baseUrl: config.apiUrl,
+			baseUrl: config.agenticApiUrl,
 			credentials: "include",
 		});
-	}, [config.apiUrl]);
+	}, [config.agenticApiUrl]);
 }
 
 // React hook to get the API client

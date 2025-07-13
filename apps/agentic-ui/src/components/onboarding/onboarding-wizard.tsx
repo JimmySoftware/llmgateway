@@ -1,6 +1,4 @@
 import { Elements } from "@stripe/react-stripe-js";
-import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { usePostHog } from "posthog-js/react";
 import * as React from "react";
 import { useState } from "react";
@@ -17,35 +15,47 @@ import { useStripe } from "@/lib/stripe";
 
 type FlowType = "credits" | "byok" | null;
 
-const getSteps = (flowType: FlowType) => [
-	{
-		id: "welcome",
-		title: "Welcome",
-	},
-	{
-		id: "api-key",
-		title: "API Key",
-	},
-	{
-		id: "plan-choice",
-		title: "Choose Plan",
-	},
-	{
-		id: flowType === "credits" ? "credits" : "provider-key",
-		title: flowType === "credits" ? "Credits" : "Provider Key",
-		optional: true,
-	},
-];
+interface Step {
+	id: string;
+	title: string;
+	optional?: boolean;
+}
+
+const getSteps = (flowType: FlowType): Step[] => {
+	const baseSteps: Step[] = [
+		{
+			id: "welcome",
+			title: "Welcome",
+		},
+		{
+			id: "api-key",
+			title: "API Key",
+		},
+		{
+			id: "plan-choice",
+			title: "Choose Plan",
+		},
+	];
+
+	// Only add the final step if a flow type has been selected
+	if (flowType) {
+		baseSteps.push({
+			id: flowType === "credits" ? "credits" : "provider-key",
+			title: flowType === "credits" ? "Credits" : "Provider Key",
+			optional: true,
+		});
+	}
+
+	return baseSteps;
+};
 
 export function OnboardingWizard() {
 	const [activeStep, setActiveStep] = useState(0);
 	const [flowType, setFlowType] = useState<FlowType>(null);
 	const [hasSelectedPlan, setHasSelectedPlan] = useState(false);
 	const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
-	const navigate = useNavigate();
 	const posthog = usePostHog();
 	const { stripe, isLoading: stripeLoading } = useStripe();
-	const queryClient = useQueryClient();
 	const api = useApi();
 	const completeOnboarding = api.useMutation(
 		"post",
@@ -62,9 +72,15 @@ export function OnboardingWizard() {
 				posthog.capture("onboarding_skipped", {
 					skippedAt: "plan_choice",
 				});
-				await completeOnboarding.mutateAsync({});
-				queryClient.clear();
-				navigate({ to: "/dashboard" });
+				console.log(
+					"[ONBOARDING] Calling complete-onboarding endpoint (skip plan)...",
+				);
+				const result = await completeOnboarding.mutateAsync({});
+				console.log("[ONBOARDING] Complete onboarding result:", result);
+
+				// Use window.location to force a full page reload
+				// This ensures all client-side caches are cleared and fresh data is fetched
+				window.location.href = "/dashboard";
 				return;
 			}
 			// If plan is selected, continue to next step
@@ -76,9 +92,13 @@ export function OnboardingWizard() {
 				flowType,
 			});
 
-			await completeOnboarding.mutateAsync({});
-			queryClient.clear();
-			navigate({ to: "/dashboard" });
+			console.log("[ONBOARDING] Calling complete-onboarding endpoint...");
+			const result = await completeOnboarding.mutateAsync({});
+			console.log("[ONBOARDING] Complete onboarding result:", result);
+
+			// Use window.location to force a full page reload
+			// This ensures all client-side caches are cleared and fresh data is fetched
+			window.location.href = "/dashboard";
 			return;
 		}
 		setActiveStep(step);

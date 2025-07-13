@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
@@ -35,7 +34,6 @@ export const Route = createFileRoute("/login")({
 });
 
 function RouteComponent() {
-	const QueryClient = useQueryClient();
 	const navigate = useNavigate();
 	const posthog = usePostHog();
 	const [isLoading, setIsLoading] = useState(false);
@@ -82,10 +80,7 @@ function RouteComponent() {
 				password: values.password,
 			},
 			{
-				onSuccess: (ctx) => {
-					// Don't clear all queries - this causes session data to be lost
-					// Instead, invalidate specific queries if needed
-					QueryClient.invalidateQueries({ queryKey: ["user"] });
+				onSuccess: async (ctx) => {
 					posthog.identify(ctx.data.user.id, {
 						email: ctx.data.user.email,
 						name: ctx.data.user.name,
@@ -95,12 +90,10 @@ function RouteComponent() {
 						email: values.email,
 					});
 					toast({ title: "Login successful" });
-					// Navigate based on onboarding status
-					if (ctx.data.user.onboardingCompleted) {
-						navigate({ to: "/dashboard", replace: true });
-					} else {
-						navigate({ to: "/onboarding", replace: true });
-					}
+
+					// Force a reload to ensure fresh user data is fetched
+					// This will trigger the useUser hook to redirect properly
+					window.location.href = "/dashboard";
 				},
 				onError: (ctx) => {
 					toast({

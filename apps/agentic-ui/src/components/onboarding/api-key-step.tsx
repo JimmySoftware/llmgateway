@@ -46,7 +46,11 @@ export function ApiKeyStep() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [apiKey, setApiKey] = useState<string | null>(null);
 	const [showCreateForm, setShowCreateForm] = useState(false);
-	const { data: defaultProject, isError } = useDefaultProject();
+	const {
+		data: defaultProject,
+		isError,
+		isLoading: isLoadingProject,
+	} = useDefaultProject();
 	const api = useApi();
 
 	// Fetch existing API keys
@@ -82,10 +86,14 @@ export function ApiKeyStep() {
 		maskedToken: string;
 	}
 
-	const existingKeys =
-		apiKeysData?.apiKeys?.filter(
+	const existingKeys = React.useMemo(() => {
+		if (!apiKeysData?.apiKeys || !Array.isArray(apiKeysData.apiKeys)) {
+			return [];
+		}
+		return apiKeysData.apiKeys.filter(
 			(key: ApiKeyType) => key.status !== "deleted",
-		) || [];
+		);
+	}, [apiKeysData]);
 	const hasExistingKeys = existingKeys.length > 0;
 
 	async function onSubmit(values: FormValues) {
@@ -135,7 +143,7 @@ export function ApiKeyStep() {
 		}
 	}
 
-	if (isLoadingKeys) {
+	if (isLoadingKeys || isLoadingProject) {
 		return (
 			<Step>
 				<div className="flex flex-col gap-6">

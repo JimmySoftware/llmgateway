@@ -7,7 +7,7 @@ import { startWorker, stopWorker } from "./worker";
 
 const port = Number(process.env.PORT) || 4001;
 
-console.log("listening on port", port);
+console.log(`listening on port \x1b[33m${port}\x1b[0m`);
 
 void startWorker();
 

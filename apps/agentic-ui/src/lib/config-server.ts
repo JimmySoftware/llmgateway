@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 export interface AppConfig {
 	hosted: boolean;
 	apiUrl: string;
+	agenticApiUrl: string;
 	githubUrl: string;
 	docsUrl: string;
 	posthogKey?: string;
@@ -16,6 +17,7 @@ export const getConfig = createServerFn({
 	return {
 		hosted: process.env.HOSTED === "true",
 		apiUrl: process.env.API_URL || "http://localhost:4002",
+		agenticApiUrl: process.env.AGENTIC_API_URL || "http://localhost:4000",
 		githubUrl:
 			process.env.GITHUB_URL || "https://github.com/theopenco/llmgateway",
 		docsUrl: process.env.DOCS_URL || "http://localhost:3005",

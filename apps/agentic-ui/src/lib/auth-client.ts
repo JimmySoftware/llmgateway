@@ -10,10 +10,10 @@ export function useAuthClient() {
 
 	return useMemo(() => {
 		return createAuthClient({
-			baseURL: config.apiUrl + "/auth",
+			baseURL: config.agenticApiUrl + "/auth",
 			plugins: [passkeyClient()],
 		});
-	}, [config.apiUrl]);
+	}, [config.agenticApiUrl]);
 }
 
 // React hook for auth methods
