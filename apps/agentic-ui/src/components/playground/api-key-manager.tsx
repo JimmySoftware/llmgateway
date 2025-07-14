@@ -32,6 +32,7 @@ import {
 	TabsTrigger,
 } from "@/lib/components/tabs";
 import { toast } from "@/lib/components/use-toast";
+import { useAppConfigValue } from "@/lib/config";
 
 const apiKeySchema = z.object({
 	apiKey: z
@@ -130,6 +131,7 @@ function CreateNewKeyForm({
 }
 
 export function ApiKeyManager({ open, onOpenChange }: ApiKeyManagerProps) {
+	const config = useAppConfigValue();
 	const { userApiKey, setUserApiKey, clearUserApiKey, isLoaded } = useApiKey();
 	const [isLoading, setIsLoading] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
@@ -162,36 +164,29 @@ export function ApiKeyManager({ open, onOpenChange }: ApiKeyManagerProps) {
 	const handleSubmit = async (values: z.infer<typeof apiKeySchema>) => {
 		setIsLoading(true);
 		try {
-			const testResponse = await fetch("/chat/completion", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
+			// Test the API key by making a simple chat request
+			const testResponse = await fetch(
+				config.agenticApiUrl + "/chat/completion",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						model: "gpt-4o-mini",
+						messages: [{ role: "user", content: "Hello" }],
+						stream: false,
+						apiKey: values.apiKey.trim(),
+					}),
 				},
-				body: JSON.stringify({
-					model: "gpt-4o-mini",
-					messages: [{ role: "user", content: "Hello" }],
-					stream: false,
-					apiKey: values.apiKey.trim(),
-				}),
-			});
+			);
 
 			if (!testResponse.ok) {
 				const errorText = await testResponse.text();
 				console.error("API key validation failed:", errorText);
-
-				if (testResponse.status === 400) {
-					throw new Error(
-						"API key is required. Please check your key and try again.",
-					);
-				} else if (testResponse.status === 401) {
-					throw new Error(
-						"Invalid API key. Please check your key and try again.",
-					);
-				} else {
-					throw new Error(
-						`API key validation failed: ${testResponse.status} ${testResponse.statusText}`,
-					);
-				}
+				throw new Error(
+					"Invalid API key. Please check your key and try again.",
+				);
 			}
 
 			setUserApiKey(values.apiKey.trim());

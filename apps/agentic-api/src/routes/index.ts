@@ -7,8 +7,13 @@ import type { ServerTypes } from "../vars";
 
 export const routes = new OpenAPIHono<ServerTypes>();
 
-// Auth middleware
+// Auth middleware - skip for routes that use API keys
 routes.use("*", async (c, next) => {
+	// Skip auth for chat completion endpoint which uses API keys
+	if (c.req.path === "/chat/completion") {
+		return await next();
+	}
+
 	const session = await auth.api.getSession({
 		headers: c.req.raw.headers,
 	});

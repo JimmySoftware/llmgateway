@@ -3,6 +3,7 @@ import { streamSSE } from "hono/streaming";
 import { z } from "zod";
 
 import { routes } from "./index";
+import { validateApiKey } from "../middleware/auth";
 
 const chatCompletionSchema = z.object({
 	messages: z.array(
@@ -13,7 +14,17 @@ const chatCompletionSchema = z.object({
 	),
 	model: z.string(),
 	stream: z.boolean().optional().default(false),
-	apiKey: z.string().optional(), // Optional user API key
+	apiKey: z.string(), // Required for validation
+	// Add other OpenAI-compatible parameters
+	temperature: z.number().optional(),
+	top_p: z.number().optional(),
+	n: z.number().optional(),
+	stop: z.union([z.string(), z.array(z.string())]).optional(),
+	max_tokens: z.number().optional(),
+	presence_penalty: z.number().optional(),
+	frequency_penalty: z.number().optional(),
+	logit_bias: z.record(z.number()).optional(),
+	user: z.string().optional(),
 });
 
 // POST /chat/completion
@@ -21,7 +32,8 @@ routes.openapi(
 	{
 		method: "post",
 		path: "/chat/completion",
-		description: "Chat completion endpoint",
+		description:
+			"Chat completion endpoint - validates API key and forwards to LLM Gateway",
 		request: {
 			body: {
 				content: {
@@ -39,122 +51,65 @@ routes.openapi(
 				description: "Bad request",
 			},
 			401: {
-				description: "Unauthorized",
+				description: "Unauthorized - Invalid API key",
+			},
+			403: {
+				description: "Forbidden - Inactive project or organization",
 			},
 			500: {
 				description: "Internal server error",
 			},
 		},
-		middleware: [],
+		middleware: [validateApiKey],
 	},
 	async (c) => {
 		try {
 			const body = c.req.valid("json");
-			const { messages, model, stream } = body;
+			const { apiKey, ...chatParams } = body;
 
-			// For now, we'll bypass the gateway and directly call the provider APIs
-			// This is a temporary solution for the playground
-			let providerUrl: string;
-			let authHeader: string;
-			let requestBody: any;
+			// Get the validated context
+			const validatedKey = c.get("apiKey");
+			const project = c.get("project");
+			const organization = c.get("organization");
 
-			if (model.startsWith("gpt-") || model.startsWith("o1-")) {
-				// OpenAI models
-				if (!process.env.OPENAI_API_KEY) {
-					throw new HTTPException(500, {
-						message: "OpenAI API key not configured",
-					});
-				}
-				providerUrl = "https://api.openai.com/v1/chat/completions";
-				authHeader = `Bearer ${process.env.OPENAI_API_KEY}`;
-				requestBody = {
-					model,
-					messages,
-					stream,
-					temperature: 0.7,
-					max_tokens: 2048,
-				};
-			} else if (model.startsWith("claude-")) {
-				// Anthropic models
-				if (!process.env.ANTHROPIC_API_KEY) {
-					throw new HTTPException(500, {
-						message: "Anthropic API key not configured",
-					});
-				}
-				providerUrl = "https://api.anthropic.com/v1/messages";
-				authHeader = process.env.ANTHROPIC_API_KEY;
-				// Convert to Anthropic format
-				requestBody = {
-					model,
-					messages: messages.filter((m: any) => m.role !== "system"),
-					system: messages.find((m: any) => m.role === "system")?.content,
-					max_tokens: 2048,
-					stream,
-				};
-			} else if (model.startsWith("gemini-")) {
-				// Google models
-				if (!process.env.GOOGLE_AI_STUDIO_API_KEY) {
-					throw new HTTPException(500, {
-						message: "Google API key not configured",
-					});
-				}
-				// For simplicity, we'll use OpenAI format via gateway for now
-				return c.json(
-					{ error: "Google models not yet supported in playground" },
-					400,
-				);
-			} else {
-				return c.json({ error: `Unsupported model: ${model}` }, 400);
+			if (!validatedKey || !project || !organization) {
+				throw new HTTPException(401, {
+					message: "Invalid authentication context",
+				});
 			}
 
-			const response = await fetch(providerUrl, {
+			// Log the usage (optional - for tracking)
+			console.log(
+				`API call from org: ${organization.name}, project: ${project.name}`,
+			);
+
+			// Forward the request to the gateway
+			const gatewayUrl = "http://localhost:4001"; // Internal gateway URL
+
+			const response = await fetch(`${gatewayUrl}/v1/chat/completions`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					...(model.startsWith("claude-")
-						? {
-								"x-api-key": authHeader,
-								"anthropic-version": "2023-06-01",
-							}
-						: {
-								Authorization: authHeader,
-							}),
+					Authorization: `Bearer ${apiKey}`,
 				},
-				body: JSON.stringify(requestBody),
+				body: JSON.stringify(chatParams),
 			});
 
 			if (!response.ok) {
 				const errorText = await response.text();
 				try {
 					const errorJson = JSON.parse(errorText);
-					if (errorJson.message) {
-						return c.json(
-							{ error: "gateway returned: " + errorJson.message },
-							response.status as any,
-						);
-					}
+					return c.json(errorJson, response.status as any);
+				} catch {
 					return c.json(
-						{ error: `Failed to get chat completion: ${errorText}` },
-						response.status as any,
-					);
-				} catch (_err) {
-					return c.json(
-						{ error: `Failed to get chat completion: ${errorText}` },
+						{ error: `Gateway error: ${errorText}` },
 						response.status as any,
 					);
 				}
 			}
 
-			if (stream) {
-				// Handle streaming response
-				if (model.startsWith("claude-")) {
-					// Anthropic has a different streaming format
-					return c.json(
-						{ error: "Streaming not yet supported for Anthropic models" },
-						400,
-					);
-				}
-
+			// Handle streaming response
+			if (chatParams.stream) {
 				return streamSSE(c, async (stream) => {
 					const reader = response.body?.getReader();
 					if (!reader) {
@@ -198,28 +153,16 @@ routes.openapi(
 			} else {
 				// Handle non-streaming response
 				const responseData = await response.json();
-
-				if (model.startsWith("claude-")) {
-					// Convert Anthropic response to OpenAI format
-					return c.json({
-						choices: [
-							{
-								message: {
-									content: responseData.content?.[0]?.text || "",
-									role: "assistant",
-								},
-								finish_reason: responseData.stop_reason || "stop",
-							},
-						],
-						model: responseData.model,
-					});
-				} else {
-					// OpenAI format, return as-is
-					return c.json(responseData);
-				}
+				return c.json(responseData);
 			}
 		} catch (error) {
 			console.error("Chat completion error:", error);
+
+			// If error is already an HTTPException, re-throw it
+			if (error instanceof HTTPException) {
+				throw error;
+			}
+
 			return c.json({ error: "Failed to get chat completion" }, 500);
 		}
 	},
